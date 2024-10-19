@@ -5,4 +5,5 @@ class AppRoute {
   static String mainScreen = '/main-screen';
   static String profileScreen = '/profile-screen';
   static String settingScreen = '/setting-screen';
+  static String dictionaryScreen = '/dictionary-screen';
 }

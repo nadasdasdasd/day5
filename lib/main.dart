@@ -2,6 +2,7 @@ import 'package:day4/blocs/todolist/todolist_cubit.dart';
 import 'package:day4/consts/app_route.dart';
 import 'package:day4/models/todolist.dart';
 import 'package:day4/screens/AddToDoListScreen.dart';
+import 'package:day4/screens/DictionaryScreen.dart';
 import 'package:day4/screens/ProfileScreen.dart';
 import 'package:day4/screens/SettingScreen.dart';
 import 'package:day4/screens/splashScreen.dart';
@@ -50,6 +51,7 @@ class _TodoListAppState extends State<TodoListApp> {
   final List<Widget> _pages = <Widget>[
     const TodoListAppHomepage(),
     const ProfileScreen(),
+    const DictionaryScreen(),
     const Settingscreen(),
   ];
 
@@ -69,6 +71,7 @@ class _TodoListAppState extends State<TodoListApp> {
           children: _pages,
         ),
         bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.purpleAccent,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
@@ -79,12 +82,17 @@ class _TodoListAppState extends State<TodoListApp> {
               label: 'Profile',
             ),
             BottomNavigationBarItem(
+              icon: Icon(Icons.book),
+              label: 'Dictionary',
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.settings),
               label: 'Settings',
             ),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: Colors.blue,
+          selectedItemColor: Colors.deepPurpleAccent,
+          unselectedItemColor: Colors.purpleAccent,
           onTap: _onItemTapped,
         ),
       ),
