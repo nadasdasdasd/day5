@@ -8,12 +8,8 @@ import 'package:day4/screens/SettingScreen.dart';
 import 'package:day4/screens/splashScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
-  Hive.registerAdapter(TodolistAdapter());
-  await Hive.initFlutter();
-  await Hive.openBox<Todolist>('todoList');
   runApp(const MyApp());
 }
 
@@ -51,7 +47,7 @@ class _TodoListAppState extends State<TodoListApp> {
   final List<Widget> _pages = <Widget>[
     const TodoListAppHomepage(),
     const ProfileScreen(),
-    const DictionaryScreen(),
+    DictionaryScreen(),
     const Settingscreen(),
   ];
 
@@ -111,15 +107,26 @@ class TodoListAppHomepage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('To Do List'),
       ),
-      body: BlocBuilder<ToDoListAppCubit, List<String>>(
+      body: BlocBuilder<ToDoListAppCubit, List<Task>>(
         builder: (context, state) {
           return ListView.builder(
             itemCount: state.length,
             itemBuilder: (context, index) {
               final task = state[index];
-              return ListTile(
-                title: Text(task),
-                onTap: () => todoListCubit.deleteTask(index),
+              return GestureDetector(
+                onTap: () {
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    if (GestureDetectorState.isTapping) {
+                      _confirmDelete(context, task, todoListCubit);
+                    }
+                  });
+                },
+                onLongPress: () {
+                  GestureDetectorState.isTapping = false;
+                },
+                child: ListTile(
+                  title: Text(task.task),
+                ),
               );
             },
           );
@@ -132,7 +139,8 @@ class TodoListAppHomepage extends StatelessWidget {
             return const AddToDoListScreen();
           }));
           if (task != null && context.mounted) {
-            todoListCubit.addTask(task);
+            final newTask = Task(id: 0, task: task);
+            todoListCubit.addTask(newTask);
           }
         },
         tooltip: 'Add Task',
@@ -140,4 +148,36 @@ class TodoListAppHomepage extends StatelessWidget {
       ),
     );
   }
+
+  void _confirmDelete(
+      BuildContext context, Task task, ToDoListAppCubit todoListCubit) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Task'),
+          content: Text('Are you sure you want to delete "${task.task}"?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                todoListCubit.deleteTask(task.id);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class GestureDetectorState {
+  static bool isTapping = true;
 }
