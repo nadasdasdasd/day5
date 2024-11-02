@@ -1,3 +1,4 @@
+import 'package:day4/models/favorite_word.dart';
 import 'package:day4/models/todolist.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -31,7 +32,31 @@ class TodolistDatabaseHelper {
               task TEXT NOT NULL
             )
           ''');
+        await db.execute('''
+          CREATE TABLE favorite_words(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            word TEXT NOT NULL,
+            phonetic TEXT,
+            synonyms TEXT,
+            antonyms TEXT,
+            definitions TEXT
+          )
+        ''');
       },
+      // onUpgrade: (db, oldVersion, newVersion) async {
+      //   if (oldVersion < 4) {
+      //     await db.execute('''
+      //     CREATE TABLE favorite_words(
+      //       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      //       word TEXT NOT NULL,
+      //       phonetic TEXT,
+      //       synonyms TEXT,
+      //       antonyms TEXT,
+      //       definitions TEXT
+      //     )
+      //   ''');
+      //   }
+      // },
     );
   }
 
@@ -61,6 +86,37 @@ class TodolistDatabaseHelper {
       }
     } catch (e) {
       _logger.e('Error deleting task: $e');
+    }
+  }
+
+  //insert favorite word
+  Future<void> insertFavoriteWord(FavoriteWord word) async {
+    final db = await database;
+    await db.insert('favorite_words', word.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<List<FavoriteWord>> getFavoriteWords() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('favorite_words');
+    return List.generate(maps.length, (index) {
+      return FavoriteWord.fromMap(maps[index]);
+    });
+  }
+
+  Future<void> deleteFavoriteWord(int id) async {
+    try {
+      final db = await database;
+      _logger.i("attemp to delete favorite word id $id");
+      final result =
+          await db.delete('favorite_words', where: 'id = ?', whereArgs: [id]);
+      if (result == 0) {
+        _logger.w('no favorite word found');
+      } else {
+        _logger.i('successfully deleted favorite word id $id');
+      }
+    } catch (e) {
+      _logger.e('error deleting favorite word id $id');
     }
   }
 }
